@@ -14,7 +14,8 @@ public class Main {
         System.out.println("Ok!");
 
         UserService service = new UserServiceImpl();
-        service.createUsersTable();
-        service.dropUsersTable();
+        service.saveUser("Vasya", "Pupkin", (byte)18);
+        service.removeUserById(1L);
+
     }
 }

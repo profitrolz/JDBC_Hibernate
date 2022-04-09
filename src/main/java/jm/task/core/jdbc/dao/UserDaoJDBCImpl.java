@@ -8,7 +8,11 @@ import javax.sql.DataSource;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
@@ -43,18 +47,64 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
+        String query = "Insert into users (name, lastName, age) values(?,?,?)";
+
+        try (Connection connection = dataSource.getConnection()){
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, name);
+            statement.setString(2, lastName);
+            statement.setByte(3, age);
+            statement.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 
     public void removeUserById(long id) {
+        String query = "Delete from users where id = ?";
 
+        try (Connection connection = dataSource.getConnection()){
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setLong(1, id);
+            statement.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public List<User> getAllUsers() {
-        return null;
+        List<User> users = new ArrayList<>();
+        String query = "Select * from users";
+
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet rs = statement.executeQuery(query);
+            while(rs.next()) {
+                User user = new User();
+                user.setId(rs.getLong("id"));
+                user.setName(rs.getString("name"));
+                user.setLastName(rs.getString("lastname"));
+                user.setAge(rs.getByte("age"));
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
     }
 
     public void cleanUsersTable() {
+        String query = "Delete from users";
 
-    }
+        try (Connection connection = dataSource.getConnection()){
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }    }
 }
