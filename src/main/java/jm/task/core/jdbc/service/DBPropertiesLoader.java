@@ -18,8 +18,6 @@ public class DBPropertiesLoader {
 
         try (FileReader fileReader = new FileReader(propertiesFilePath)) {
             properties.load(fileReader);
-        } catch (IOException e) {
-            throw new IOException("Properties load exception", e);
         }
 
         return properties;

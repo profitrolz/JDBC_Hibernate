@@ -5,6 +5,7 @@ import jm.task.core.jdbc.util.Util;
 import org.apache.ibatis.jdbc.ScriptRunner;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,10 +28,11 @@ public class UserDaoJDBCImpl implements UserDao {
         dropUsersTable();
         try {
             SQLScriptRunner scriptRunner = new SQLScriptRunner(dataSource);
-            scriptRunner.runSqlScript(Path.of(""));
-            Path path = Paths.get(UserDaoJDBCImpl.class.getClassLoader().getResource("createTables.sql").toURI());
+            Path path = Paths.get(UserDaoJDBCImpl.class.getClassLoader()
+                    .getResource("createTables.sql")
+                    .toURI());
             scriptRunner.runSqlScript(path);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | SQLException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -38,22 +40,23 @@ public class UserDaoJDBCImpl implements UserDao {
     public void dropUsersTable() {
         try {
             SQLScriptRunner scriptRunner = new SQLScriptRunner(dataSource);
-            scriptRunner.runSqlScript(Path.of(""));
-            Path path = Paths.get(UserDaoJDBCImpl.class.getClassLoader().getResource("dropTables.sql").toURI());
+            Path path = Paths.get(UserDaoJDBCImpl.class.getClassLoader()
+                    .getResource("dropTables.sql")
+                    .toURI());
             scriptRunner.runSqlScript(path);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | SQLException | IOException e) {
             e.printStackTrace();
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
         String query = "Insert into users (name, lastName, age) values(?,?,?)";
-
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, name);
             statement.setString(2, lastName);
             statement.setByte(3, age);
+
             statement.execute();
 
         } catch (SQLException e) {
@@ -65,7 +68,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void removeUserById(long id) {
         String query = "Delete from users where id = ?";
 
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setLong(1, id);
             statement.execute();
@@ -82,13 +85,8 @@ public class UserDaoJDBCImpl implements UserDao {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet rs = statement.executeQuery(query);
-            while(rs.next()) {
-                User user = new User();
-                user.setId(rs.getLong("id"));
-                user.setName(rs.getString("name"));
-                user.setLastName(rs.getString("lastname"));
-                user.setAge(rs.getByte("age"));
-                users.add(user);
+            while (rs.next()) {
+                users.add(Extractors.extractUser(rs, "id", "name", "lastName", "age"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -100,11 +98,12 @@ public class UserDaoJDBCImpl implements UserDao {
     public void cleanUsersTable() {
         String query = "Delete from users";
 
-        try (Connection connection = dataSource.getConnection()){
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.execute();
 
         } catch (SQLException e) {
             e.printStackTrace();
-        }    }
+        }
+    }
 }

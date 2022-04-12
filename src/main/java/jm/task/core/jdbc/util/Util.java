@@ -11,7 +11,7 @@ import java.util.Properties;
 public class Util {
     public static DataSource getDataSource() {
         DBPropertiesLoader propertiesLoader = new DBPropertiesLoader();
-        Properties properties = null;
+        Properties properties;
         try {
             properties = propertiesLoader.load("dbproperties.properties");
         } catch (IOException e) {

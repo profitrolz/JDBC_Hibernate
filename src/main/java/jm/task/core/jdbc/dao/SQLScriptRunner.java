@@ -19,17 +19,13 @@ public class SQLScriptRunner {
         this.dataSource = dataSource;
     }
 
-    public void runSqlScript(Path script){
+    public void runSqlScript(Path script) throws SQLException, IOException {
 
         try (Connection connection = dataSource.getConnection()) {
-            try(BufferedReader bufferedReader = new BufferedReader(new FileReader(script.toFile()))){
+            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(script.toFile()))) {
                 ScriptRunner sr = new ScriptRunner(connection);
                 sr.runScript(bufferedReader);
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
             }
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
         }
     }
 }
