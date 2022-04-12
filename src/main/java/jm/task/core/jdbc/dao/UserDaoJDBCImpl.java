@@ -25,7 +25,6 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        dropUsersTable();
         try {
             SQLScriptRunner scriptRunner = new SQLScriptRunner(dataSource);
             Path path = Paths.get(UserDaoJDBCImpl.class.getClassLoader()
