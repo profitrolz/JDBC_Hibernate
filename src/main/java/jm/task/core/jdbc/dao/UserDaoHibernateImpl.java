@@ -9,7 +9,7 @@ import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
 
-    private static final String TABLE_CREATE_QUERY = "create table users\n" +
+    private static final String TABLE_CREATE_QUERY = "create table if not exists users\n" +
             "(\n" +
             "    id        serial,\n" +
             "    name varchar(255) not null,\n" +
